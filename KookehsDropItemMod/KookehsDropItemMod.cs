@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
@@ -26,11 +27,16 @@ namespace DropItems
 		public static event Action<ItemIcon> OnItemIconAdded;
 		public static event Action<EquipmentIcon> OnEquipmentIconAdded;
 
-		internal new static ManualLogSource Logger { get; set; }
+        public static ConfigEntry<bool> allowDropLunar;
+        public static ConfigEntry<bool> allowDropVoid;
+
+        internal new static ManualLogSource Logger { get; set; }
 
 		public void Awake()
 		{
-			Logger = base.Logger;
+			ReadConfig();
+
+            Logger = base.Logger;
 			NetworkingAPI.RegisterMessageType<DropItemMessage>();
 
 			IL.RoR2.UI.ItemInventoryDisplay.AllocateIcons += OnItemIconAddedHook;
@@ -58,6 +64,12 @@ namespace DropItems
 				dropItemHandler.SetData(() => equipmentIcon.targetInventory.GetComponent<CharacterMaster>(), () => PickupCatalog.FindPickupIndex(equipmentIcon.targetInventory.GetEquipmentIndex()));
 			};
 		}
+
+		private void ReadConfig()
+		{
+            allowDropLunar = base.Config.Bind<bool>(new ConfigDefinition("Tiers", "Allow Lunar"), false, new ConfigDescription("Allow items of this tier to be dropped."));
+            allowDropVoid = base.Config.Bind<bool>(new ConfigDefinition("Tiers", "Allow Void"), false, new ConfigDescription("Allow items of this tier to be dropped."));
+        }
 
 		private static void OnItemIconAddedHook(ILContext il) {
 			var cursor = new ILCursor(il).Goto(0);

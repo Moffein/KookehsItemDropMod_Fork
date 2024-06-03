@@ -1,8 +1,6 @@
 ﻿using System;
-using R2API;
 using R2API.Networking;
 using R2API.Networking.Interfaces;
-using R2API.Utils;
 using RoR2;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -35,8 +33,21 @@ namespace DropItems
 			var pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
 
 			if (pickupDef.itemIndex != ItemIndex.None) {
-				
-				if (!ItemTierCatalog.GetItemTierDef(pickupDef.itemTier).isDroppable) {
+				ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
+
+				bool cannotDrop = !tier.isDroppable;
+
+				if (KookehsDropItemMod.allowDropLunar.Value && tier.tier == ItemTier.Lunar)
+				{
+					cannotDrop = false;
+				}
+				else if (KookehsDropItemMod.allowDropVoid.Value
+					&& (tier.tier == ItemTier.VoidBoss || tier.tier == ItemTier.VoidTier1 || tier.tier == ItemTier.VoidTier2 || tier.tier == ItemTier.VoidTier3))
+                {
+                    cannotDrop = false;
+                }
+
+				if (cannotDrop) {
 					return;
                 }
             }
