@@ -41,13 +41,14 @@ namespace DropItems_Fork
 			itemDropMessage.Send(NetworkDestination.Server);
 		}
 
-		public static void DropItem(Transform charTransform, Inventory inventory, PickupIndex pickupIndex)
+		public static void DropItem(Vector3 position, Vector3 direction, Inventory inventory, PickupIndex pickupIndex)
 		{
 			//Verify Tier on the server so that clients can't change their config at-will.
 			if (!VerifyIsDroppable(pickupIndex)) return;
 
-            KookehsDropItemMod.Logger.LogDebug("Transform: " + charTransform.position.ToString());
-			KookehsDropItemMod.Logger.LogDebug("Inventory: " + inventory.name);
+            KookehsDropItemMod.Logger.LogDebug("Position: " + position);
+            KookehsDropItemMod.Logger.LogDebug("Direction: " + direction);
+            KookehsDropItemMod.Logger.LogDebug("Inventory: " + inventory.name);
 			KookehsDropItemMod.Logger.LogDebug("Pickup Index: " + pickupIndex);
 
 
@@ -73,14 +74,14 @@ namespace DropItems_Fork
 			var pickupInfo = new GenericPickupController.CreatePickupInfo()
 			{
 				pickupIndex = pickupIndex,
-				position = charTransform.position
+				position = position
             };
-			CreatePickupDroplet(pickupInfo, Vector3.up * 20f + charTransform.forward * 10f);
+			CreatePickupDroplet(pickupInfo, Vector3.up * 20f + direction * 10f);
 
         }
 
 		//Based off of RoR2.PickupDropletController.CreatePickupDroplet
-		//Removed the Command flag from this.
+		//Removed the Command Artifact flag from this.
         private static void CreatePickupDroplet(GenericPickupController.CreatePickupInfo pickupInfo, Vector3 velocity)
 		{
             GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(PickupDropletController.pickupDropletPrefab, pickupInfo.position, Quaternion.identity);
@@ -146,15 +147,15 @@ namespace DropItems_Fork
             return canDrop;
 		}
 
-		public static void CreateNotification(CharacterBody character, Transform transform, PickupIndex pickupIndex)
+		public static void CreateNotification(CharacterBody character, PickupIndex pickupIndex)
 		{
 			if (PickupCatalog.GetPickupDef(pickupIndex).equipmentIndex != EquipmentIndex.None)
 			{
-				CreateNotification(character, transform, PickupCatalog.GetPickupDef(pickupIndex).equipmentIndex);
+				CreateNotification(character, character.transform, PickupCatalog.GetPickupDef(pickupIndex).equipmentIndex);
 			} 
 			else
 			{
-				CreateNotification(character, transform, PickupCatalog.GetPickupDef(pickupIndex).itemIndex);
+				CreateNotification(character, character.transform, PickupCatalog.GetPickupDef(pickupIndex).itemIndex);
 			}
 		}
 

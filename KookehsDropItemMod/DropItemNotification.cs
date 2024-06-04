@@ -8,7 +8,7 @@ namespace DropItems_Fork
     {
         private Notification notification;
         private float startTime = 0;
-        private float duration = 6.0f;
+        private float duration = 3.0f;  //was 6f
 
         void Update()
         {

@@ -48,16 +48,21 @@ namespace DropItems_Fork
             Log("PickupIndex" + this.pickupIndex.ToString());
 
 			var bodyObject = Util.FindNetworkObject(netId);
+			if (!bodyObject) return;
 
 			var body = bodyObject.GetComponent<CharacterBody>();
 			Log("Body is null: " + (body == null).ToString());
+			if (!body) return;
 
 			var inventory = body.master.inventory;
-			var charTransform = body.GetFieldValue<Transform>("transform");
+			var charTransform = body.transform;
 
-			DropItemHandler.DropItem(charTransform, inventory, pickupIndex);
+			Vector3 position = body.corePosition;
+			Vector3 direction = body.characterDirection ? body.characterDirection.forward : body.transform.forward;
 
-			if (KookehsDropItemMod.enableNotifications.Value) DropItemHandler.CreateNotification(body, charTransform, pickupIndex);
+			DropItemHandler.DropItem(position, direction, inventory, pickupIndex);
+
+			if (KookehsDropItemMod.enableNotifications.Value) DropItemHandler.CreateNotification(body, pickupIndex);
 		}
     }
 }
