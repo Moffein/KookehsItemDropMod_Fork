@@ -10,3 +10,4 @@ Allows players to drop their own items out of their inventories to trade with fr
 - 2.3.x - Updated for DLC patch
 - 2.3.2 - Fixed NullReferenceException spam
 - 2.3.4 - Fixed for latest update
+- 2.4.0 - Added some extra features from YEET.

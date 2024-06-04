@@ -3,6 +3,7 @@ using R2API.Networking;
 using R2API.Networking.Interfaces;
 using RoR2;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
@@ -30,27 +31,8 @@ namespace DropItems
 
 			var pickupIndex = getPickupIndex();
 			var identity = master.GetBody().gameObject.GetComponent<NetworkIdentity>();
-			var pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
 
-			if (pickupDef.itemIndex != ItemIndex.None) {
-				ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
-
-				bool cannotDrop = !tier.isDroppable;
-
-				if (KookehsDropItemMod.allowDropLunar.Value && tier.tier == ItemTier.Lunar)
-				{
-					cannotDrop = false;
-				}
-				else if (KookehsDropItemMod.allowDropVoid.Value
-					&& (tier.tier == ItemTier.VoidBoss || tier.tier == ItemTier.VoidTier1 || tier.tier == ItemTier.VoidTier2 || tier.tier == ItemTier.VoidTier3))
-                {
-                    cannotDrop = false;
-                }
-
-				if (cannotDrop) {
-					return;
-                }
-            }
+			if (!VerifyIsDroppable(pickupIndex)) return;
 
 			KookehsDropItemMod.Logger.LogDebug("KDI: Sending network message");
 
@@ -60,7 +42,10 @@ namespace DropItems
 
 		public static void DropItem(Transform charTransform, Inventory inventory, PickupIndex pickupIndex)
 		{
-			KookehsDropItemMod.Logger.LogDebug("Transform: " + charTransform.position.ToString());
+			//Verify Tier on the server so that clients can't change their config at-will.
+			if (!VerifyIsDroppable(pickupIndex)) return;
+
+            KookehsDropItemMod.Logger.LogDebug("Transform: " + charTransform.position.ToString());
 			KookehsDropItemMod.Logger.LogDebug("Inventory: " + inventory.name);
 			KookehsDropItemMod.Logger.LogDebug("Pickup Index: " + pickupIndex);
 
@@ -86,6 +71,44 @@ namespace DropItems
 
 			PickupDropletController.CreatePickupDroplet(pickupIndex,
 				charTransform.position, Vector3.up * 20f + charTransform.forward * 10f);
+		}
+
+		private static bool VerifyIsDroppable(PickupIndex pickupIndex)
+        {
+
+            bool canDrop = true;
+            PickupDef pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
+            if (pickupDef != null)
+            {
+                ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
+
+                if (tier != null)
+                {
+					//Check this here so that it defaults to allowing it if it can't find the tier.
+                    if (!KookehsDropItemMod.allowInBazaar.Value)
+                    {
+                        SceneDef currentScene = SceneCatalog.GetSceneDefForCurrentScene();
+                        if (currentScene && currentScene.baseSceneName == "bazaar")
+                        {
+                            return false;
+                        }
+                    }
+
+                    canDrop = tier.isDroppable;
+
+                    if (KookehsDropItemMod.allowDropLunar.Value && tier.tier == ItemTier.Lunar)
+                    {
+                        canDrop = true;
+                    }
+                    else if (KookehsDropItemMod.allowDropVoid.Value
+                        && (tier.tier == ItemTier.VoidBoss || tier.tier == ItemTier.VoidTier1 || tier.tier == ItemTier.VoidTier2 || tier.tier == ItemTier.VoidTier3))
+                    {
+                        canDrop = true;
+                    }
+                }
+            }
+
+			return canDrop;
 		}
 
 		public static void CreateNotification(CharacterBody character, Transform transform, PickupIndex pickupIndex)

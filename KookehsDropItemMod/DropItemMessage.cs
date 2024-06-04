@@ -56,7 +56,8 @@ namespace DropItems
 			var charTransform = body.GetFieldValue<Transform>("transform");
 
 			DropItemHandler.DropItem(charTransform, inventory, pickupIndex);
-			DropItemHandler.CreateNotification(body, charTransform, pickupIndex);
+
+			if (KookehsDropItemMod.enableNotifications.Value) DropItemHandler.CreateNotification(body, charTransform, pickupIndex);
 		}
     }
 }
