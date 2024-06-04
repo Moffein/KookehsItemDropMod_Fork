@@ -7,7 +7,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 
-namespace DropItems
+namespace DropItems_Fork
 {
 	public class DropItemHandler : MonoBehaviour, IPointerClickHandler
 	{
@@ -32,7 +32,8 @@ namespace DropItems
 			var pickupIndex = getPickupIndex();
 			var identity = master.GetBody().gameObject.GetComponent<NetworkIdentity>();
 
-			if (!VerifyIsDroppable(pickupIndex)) return;
+			//Don't check on the client, so that Server settings take priority.
+			//if (!VerifyIsDroppable(pickupIndex)) return;
 
 			KookehsDropItemMod.Logger.LogDebug("KDI: Sending network message");
 
@@ -69,11 +70,43 @@ namespace DropItems
 				inventory.RemoveItem(PickupCatalog.GetPickupDef(pickupIndex).itemIndex, 1);
 			}
 
-			PickupDropletController.CreatePickupDroplet(pickupIndex,
-				charTransform.position, Vector3.up * 20f + charTransform.forward * 10f);
-		}
+			var pickupInfo = new GenericPickupController.CreatePickupInfo()
+			{
+				pickupIndex = pickupIndex,
+				position = charTransform.position
+            };
+			CreatePickupDroplet(pickupInfo, Vector3.up * 20f + charTransform.forward * 10f);
 
-		private static bool VerifyIsDroppable(PickupIndex pickupIndex)
+        }
+
+		//Based off of RoR2.PickupDropletController.CreatePickupDroplet
+		//Removed the Command flag from this.
+        private static void CreatePickupDroplet(GenericPickupController.CreatePickupInfo pickupInfo, Vector3 velocity)
+		{
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(PickupDropletController.pickupDropletPrefab, pickupInfo.position, Quaternion.identity);
+
+            PickupDropletController pickupDropletController = gameObject.GetComponent<PickupDropletController>();
+            if (pickupDropletController)
+            {
+                pickupDropletController.createPickupInfo = pickupInfo;
+                pickupDropletController.NetworkpickupIndex = pickupInfo.pickupIndex;
+            }
+
+			GenericPickupController genericPickupController = gameObject.GetComponent<GenericPickupController>();
+			if (genericPickupController)
+			{
+				genericPickupController.NetworkRecycled = true;
+			}
+
+            Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
+            rigidBody.velocity = velocity;
+            rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
+
+            NetworkServer.Spawn(gameObject);
+        }
+
+
+        private static bool VerifyIsDroppable(PickupIndex pickupIndex)
         {
 
             bool canDrop = true;

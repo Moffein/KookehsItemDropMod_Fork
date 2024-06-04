@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using Console = RoR2.Console;
 
-namespace DropItems
+namespace DropItems_Fork
 {
     public class ConsoleCommands
     {

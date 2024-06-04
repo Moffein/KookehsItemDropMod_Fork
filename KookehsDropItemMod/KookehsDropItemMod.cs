@@ -12,7 +12,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace DropItems
+namespace DropItems_Fork
 {
     [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]

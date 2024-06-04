@@ -4,7 +4,7 @@ using RoR2;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace DropItems
+namespace DropItems_Fork
 {
 	public class DropItemMessage : INetMessage
 	{

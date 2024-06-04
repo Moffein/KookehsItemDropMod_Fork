@@ -2,7 +2,7 @@
 using RoR2;
 using UnityEngine;
 
-namespace DropItems
+namespace DropItems_Fork
 {
     public class DropItemNotification : MonoBehaviour
     {
