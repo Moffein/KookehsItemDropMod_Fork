@@ -38,7 +38,7 @@ namespace DropItems_Fork
             if (notification == null)
             {
                 notification = gameObject.AddComponent<Notification>();
-                notification.tag = "DropItem";
+                //notification.tag = "DropItem";    //This gives red text in console.
                 notification.transform.SetParent(transform);
                 notification.SetPosition(new Vector3((float)(Screen.width * 0.8), (float)(Screen.height * 0.25), 0));
             }

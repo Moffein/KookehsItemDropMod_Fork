@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using KookehsDropItemMod_Fork;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using R2API.Networking;
@@ -68,9 +69,25 @@ namespace DropItems_Fork
 				var dropItemHandler = equipmentIcon.transform.gameObject.AddComponent<DropItemHandler>();
 				dropItemHandler.SetData(() => equipmentIcon.targetInventory.GetComponent<CharacterMaster>(), () => PickupCatalog.FindPickupIndex(equipmentIcon.targetInventory.GetEquipmentIndex()));
 			};
+
+            IL.RoR2.PickupDropletController.CreatePickup += PickupDropletController_CreatePickup;
 		}
 
-		private void ReadConfig()
+        private void PickupDropletController_CreatePickup(ILContext il)
+        {
+			ILCursor c = new ILCursor(il);
+			c.GotoNext(MoveType.After,
+				x => x.MatchCall(typeof(GenericPickupController), "CreatePickup"));
+			c.Emit(OpCodes.Ldarg_0);	//self
+			c.EmitDelegate<Func<GenericPickupController, PickupDropletController, GenericPickupController>>((pickup, self) =>
+			{
+				MarkNonRecyclableComponent mnrc = self.GetComponent<MarkNonRecyclableComponent>();
+				if (mnrc) pickup.gameObject.AddComponent<MarkNonRecyclableComponent>();
+				return pickup;
+			});
+        }
+
+        private void ReadConfig()
 		{
 			enableNotifications = base.Config.Bind<bool>(new ConfigDefinition("General", "Enable Notifications"), true, new ConfigDescription("Display a notification when an item is dropped."));
 			allowInBazaar = base.Config.Bind<bool>(new ConfigDefinition("General", "Allow in Bazaar (Server-Side)"), true, new ConfigDescription("Allow items to be dropped while in the Bazaar."));

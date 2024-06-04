@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using R2API.Networking;
 using R2API.Networking.Interfaces;
 using RoR2;
@@ -32,8 +33,7 @@ namespace DropItems_Fork
 			var pickupIndex = getPickupIndex();
 			var identity = master.GetBody().gameObject.GetComponent<NetworkIdentity>();
 
-			//Don't check on the client, so that Server settings take priority.
-			//if (!VerifyIsDroppable(pickupIndex)) return;
+			if (!VerifyIsDroppable(pickupIndex)) return;
 
 			KookehsDropItemMod.Logger.LogDebug("KDI: Sending network message");
 
@@ -92,15 +92,12 @@ namespace DropItems_Fork
                 pickupDropletController.NetworkpickupIndex = pickupInfo.pickupIndex;
             }
 
-			GenericPickupController genericPickupController = gameObject.GetComponent<GenericPickupController>();
-			if (genericPickupController)
-			{
-				genericPickupController.NetworkRecycled = true;
-			}
-
             Rigidbody rigidBody = gameObject.GetComponent<Rigidbody>();
             rigidBody.velocity = velocity;
             rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
+
+			//This does nothing on the droplet, but will be auto-added to the pickup when it spawns, using a hook.
+			gameObject.AddComponent<KookehsDropItemMod_Fork.MarkNonRecyclableComponent>();
 
             NetworkServer.Spawn(gameObject);
         }
@@ -108,40 +105,45 @@ namespace DropItems_Fork
 
         private static bool VerifyIsDroppable(PickupIndex pickupIndex)
         {
+            PickupDef pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
+			if (pickupDef == null) return false;
+
+			//Equipments are always droppable
+			if (pickupDef.equipmentIndex != EquipmentIndex.None) return true;
 
             bool canDrop = true;
-            PickupDef pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
-            if (pickupDef != null)
+            ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
+            if (tier != null)
             {
-                ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
-
-                if (tier != null)
+                //Check this here so that it defaults to allowing it if it can't find the tier.
+                if (!KookehsDropItemMod.allowInBazaar.Value)
                 {
-					//Check this here so that it defaults to allowing it if it can't find the tier.
-                    if (!KookehsDropItemMod.allowInBazaar.Value)
+                    SceneDef currentScene = SceneCatalog.GetSceneDefForCurrentScene();
+                    if (currentScene && currentScene.baseSceneName == "bazaar")
                     {
-                        SceneDef currentScene = SceneCatalog.GetSceneDefForCurrentScene();
-                        if (currentScene && currentScene.baseSceneName == "bazaar")
-                        {
-                            return false;
-                        }
+                        return false;
                     }
+                }
 
-                    canDrop = tier.isDroppable;
+                canDrop = tier.isDroppable;
 
-                    if (KookehsDropItemMod.allowDropLunar.Value && tier.tier == ItemTier.Lunar)
-                    {
-                        canDrop = true;
-                    }
-                    else if (KookehsDropItemMod.allowDropVoid.Value
-                        && (tier.tier == ItemTier.VoidBoss || tier.tier == ItemTier.VoidTier1 || tier.tier == ItemTier.VoidTier2 || tier.tier == ItemTier.VoidTier3))
-                    {
-                        canDrop = true;
-                    }
+                if (tier.tier == ItemTier.Lunar)
+                {
+                    //Always allow Lunar Equipment to be dropped
+                    canDrop = KookehsDropItemMod.allowDropLunar.Value || pickupDef.equipmentIndex != EquipmentIndex.None;
+                }
+                else
+                {
+                    bool isVoid = tier.tier == ItemTier.VoidBoss
+                        || tier.tier == ItemTier.VoidTier1
+                        || tier.tier == ItemTier.VoidTier2
+                        || tier.tier == ItemTier.VoidTier3;
+
+                    if (isVoid) canDrop = KookehsDropItemMod.allowDropVoid.Value;
                 }
             }
 
-			return canDrop;
+            return canDrop;
 		}
 
 		public static void CreateNotification(CharacterBody character, Transform transform, PickupIndex pickupIndex)
