@@ -26,7 +26,7 @@ namespace DropItems_Fork
 
 		private const string ModGuid = "KookehsDropItemMod_Fork";
 		private const string ModName = "Kookeh's Drop Item Mod (Fork)";
-		private const string ModVersion = "2.4.0";
+		private const string ModVersion = "2.4.1";
 
 		public static event Action<ItemIcon> OnItemIconAdded;
 		public static event Action<EquipmentIcon> OnEquipmentIconAdded;

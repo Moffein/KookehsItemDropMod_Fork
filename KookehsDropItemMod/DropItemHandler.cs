@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using UnityEngine.ProBuilder.MeshOperations;
 
 namespace DropItems_Fork
 {
@@ -133,6 +134,10 @@ namespace DropItems_Fork
                     //Always allow Lunar Equipment to be dropped
                     canDrop = KookehsDropItemMod.allowDropLunar.Value || pickupDef.equipmentIndex != EquipmentIndex.None;
                 }
+				else if (tier.tier == ItemTier.NoTier)
+				{
+					canDrop = false;
+				}
                 else
                 {
                     bool isVoid = tier.tier == ItemTier.VoidBoss
