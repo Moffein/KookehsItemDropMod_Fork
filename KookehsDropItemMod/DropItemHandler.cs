@@ -99,7 +99,7 @@ namespace DropItems_Fork
             rigidBody.AddTorque(UnityEngine.Random.Range(150f, 120f) * UnityEngine.Random.onUnitSphere);
 
 			//This does nothing on the droplet, but will be auto-added to the pickup when it spawns, using a hook.
-			gameObject.AddComponent<KookehsDropItemMod_Fork.MarkNonRecyclableComponent>();
+			if (KookehsDropItemMod.preventRecycle.Value) gameObject.AddComponent<KookehsDropItemMod_Fork.MarkNonRecyclableComponent>();
 
             NetworkServer.Spawn(gameObject);
         }
