@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -76,6 +76,15 @@
     </Reference>
     <Reference Include="R2API">
       <HintPath>libs\R2API\R2API.dll</HintPath>
+    </Reference>
+    <Reference Include="R2API.CommandHelper">
+      <HintPath>libs\R2API\R2API.CommandHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="R2API.Core">
+      <HintPath>libs\R2API\R2API.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="R2API.Networking">
+      <HintPath>libs\R2API\R2API.Networking.dll</HintPath>
     </Reference>
     <Reference Include="Rewired_CSharp">
       <HintPath>libs\Rewired_CSharp.dll</HintPath>

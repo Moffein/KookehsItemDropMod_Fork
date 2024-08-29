@@ -108,16 +108,15 @@ namespace DropItems_Fork
         private static bool VerifyIsDroppable(PickupIndex pickupIndex)
         {
             PickupDef pickupDef = PickupCatalog.GetPickupDef(pickupIndex);
-			if (pickupDef == null) return false;
+            if (pickupDef == null) return false;
 
-			//Equipments are always droppable
-			if (pickupDef.equipmentIndex != EquipmentIndex.None) return true;
+            //Equipments are always droppable
+            if (pickupDef.equipmentIndex != EquipmentIndex.None) return true;
 
-            bool canDrop = true;
+            bool canDrop = false;
             ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
             if (tier != null)
             {
-                //Check this here so that it defaults to allowing it if it can't find the tier.
                 if (!KookehsDropItemMod.allowInBazaar.Value)
                 {
                     SceneDef currentScene = SceneCatalog.GetSceneDefForCurrentScene();
@@ -127,17 +126,13 @@ namespace DropItems_Fork
                     }
                 }
 
-                canDrop = tier.isDroppable;
+                canDrop = tier.isDroppable && tier.tier != ItemTier.NoTier;
 
                 if (tier.tier == ItemTier.Lunar)
                 {
                     //Always allow Lunar Equipment to be dropped
                     canDrop = KookehsDropItemMod.allowDropLunar.Value || pickupDef.equipmentIndex != EquipmentIndex.None;
                 }
-				else if (tier.tier == ItemTier.NoTier)
-				{
-					canDrop = false;
-				}
                 else
                 {
                     bool isVoid = tier.tier == ItemTier.VoidBoss
@@ -145,14 +140,17 @@ namespace DropItems_Fork
                         || tier.tier == ItemTier.VoidTier2
                         || tier.tier == ItemTier.VoidTier3;
 
-                    if (isVoid) canDrop = KookehsDropItemMod.allowDropVoid.Value;
+                    if (isVoid)
+                    {
+                        canDrop = KookehsDropItemMod.allowDropVoid.Value;
+                    }
                 }
             }
 
             return canDrop;
-		}
+        }
 
-		public static void CreateNotification(CharacterBody character, PickupIndex pickupIndex)
+        public static void CreateNotification(CharacterBody character, PickupIndex pickupIndex)
 		{
 			if (PickupCatalog.GetPickupDef(pickupIndex).equipmentIndex != EquipmentIndex.None)
 			{

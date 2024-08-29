@@ -16,6 +16,7 @@ using UnityEngine;
 namespace DropItems_Fork
 {
     [BepInDependency(R2API.R2API.PluginGUID)]
+    [BepInDependency(R2API.Networking.NetworkingAPI.PluginGUID)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInPlugin(ModGuid, ModName, ModVersion)]
 	[R2APISubmoduleDependency(nameof(NetworkingAPI), nameof(CommandHelper))]
@@ -26,7 +27,7 @@ namespace DropItems_Fork
 
 		private const string ModGuid = "KookehsDropItemMod_Fork";
 		private const string ModName = "Kookeh's Drop Item Mod (Fork)";
-		private const string ModVersion = "2.4.2";
+		private const string ModVersion = "2.4.3";
 
 		public static event Action<ItemIcon> OnItemIconAdded;
 		public static event Action<EquipmentIcon> OnEquipmentIconAdded;

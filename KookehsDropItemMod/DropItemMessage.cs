@@ -58,9 +58,19 @@ namespace DropItems_Fork
 			var charTransform = body.transform;
 
 			Vector3 position = body.corePosition;
+
 			Vector3 direction = body.characterDirection ? body.characterDirection.forward : body.transform.forward;
 
-			DropItemHandler.DropItem(position, direction, inventory, pickupIndex);
+            //Try get aimray
+            if (body.inputBank)
+            {
+				Ray aimRay = body.inputBank.GetAimRay();
+				direction = aimRay.direction;
+				direction.y = 0f;
+				direction.Normalize();
+            }
+
+            DropItemHandler.DropItem(position, direction, inventory, pickupIndex);
 
 			if (KookehsDropItemMod.enableNotifications.Value) DropItemHandler.CreateNotification(body, pickupIndex);
 		}
