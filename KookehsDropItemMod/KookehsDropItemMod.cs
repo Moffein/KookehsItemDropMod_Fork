@@ -36,7 +36,8 @@ namespace DropItems_Fork
         public static ConfigEntry<bool> allowDropVoid;
         public static ConfigEntry<bool> enableNotifications;
         public static ConfigEntry<bool> allowInBazaar;
-		public static ConfigEntry<bool> preventRecycle;
+        public static ConfigEntry<bool> preventRecycle;
+		public static ConfigEntry<bool> preventPrayerBeadsAbuse;
 
         internal new static ManualLogSource Logger { get; set; }
 
@@ -91,9 +92,10 @@ namespace DropItems_Fork
 
         private void ReadConfig()
 		{
-			enableNotifications = base.Config.Bind<bool>(new ConfigDefinition("General", "Enable Notifications"), true, new ConfigDescription("Display a notification when an item is dropped."));
+			enableNotifications = base.Config.Bind<bool>(new ConfigDefinition("General", "Enable Notifications"), false, new ConfigDescription("Display a notification when an item is dropped. Not sure if this is even networked properly."));
 			allowInBazaar = base.Config.Bind<bool>(new ConfigDefinition("General", "Allow in Bazaar (Server-Side)"), true, new ConfigDescription("Allow items to be dropped while in the Bazaar."));
 			preventRecycle = base.Config.Bind<bool>(new ConfigDefinition("General", "Prevent Recycle (Server-Side)"), true, new ConfigDescription("Dropped items cannot be recycled."));
+            preventPrayerBeadsAbuse = base.Config.Bind<bool>(new ConfigDefinition("General", "Prevent Prayer Beads Abuse (Server-Side)"), true, new ConfigDescription("Prayer Beads are undroppable to prevent players from repeatedly gaining stats."));
 
             allowDropLunar = base.Config.Bind<bool>(new ConfigDefinition("Tiers (Server-Side)", "Allow Lunar"), false, new ConfigDescription("Allow items of this tier to be dropped."));
             allowDropVoid = base.Config.Bind<bool>(new ConfigDefinition("Tiers (Server-Side)", "Allow Void"), false, new ConfigDescription("Allow items of this tier to be dropped."));

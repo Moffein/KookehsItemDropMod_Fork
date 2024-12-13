@@ -117,6 +117,13 @@ namespace DropItems_Fork
             ItemTierDef tier = ItemTierCatalog.GetItemTierDef(pickupDef.itemTier);
             if (tier != null)
             {
+				if (KookehsDropItemMod.preventPrayerBeadsAbuse.Value
+					&& pickupDef.itemIndex != ItemIndex.None
+					&& ItemCatalog.GetItemDef(pickupDef.itemIndex) == DLC2Content.Items.ExtraStatsOnLevelUp)
+				{
+					return false;
+				}
+
                 if (!KookehsDropItemMod.allowInBazaar.Value)
                 {
                     SceneDef currentScene = SceneCatalog.GetSceneDefForCurrentScene();
